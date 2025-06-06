@@ -1,37 +1,23 @@
-import { join } from 'path'; // Add this line
-import { existsSync } from 'fs'; // For file existence checking
+const express = require('express');
+const cors = require('cors');
+const { config } = require('dotenv');
 
+config();
 
-import expree, { json } from 'express';
-var app = expree()
+const app = express();
+const port = process.env.PORT || 8000;
 
-import cors from "cors";
-import { config } from "dotenv";
-
-config()  // It must be at start and index file. This will read .env file and make all Environment Variable. and we can access them using process.env.VAR_NAME
-
-var port = process.env.PORT | 8000  //PORT is default variable, so if not then default port which is 8000
-
-
-// app.get('/',(req,res)=>{
-//   res.status(200).json(allQuotes.quotes[0])
-// })
-
-//http://localhost:8000/user/signin
-
-app.use(json()) // it will convert req body into json. required for signup.
-app.use(cors())// it will add some headers in every response. so that our api can be called from anywhere.
-
-
+app.use(express.json());
+app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 
-// Simple
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
 
 
 // With DB
