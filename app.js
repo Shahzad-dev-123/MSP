@@ -1,41 +1,54 @@
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const mongoose = require('mongoose');
 const cors = require('cors');
-const { config } = require('dotenv');
-
-config();
 
 const app = express();
-const port = process.env.PORT || 8000;
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: '*' }
+});
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
+// MongoDB setup
+// mongoose.connect(process.env.MONGO_URI || 'your-mongodb-uri', {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
+
+// const Message = mongoose.model('Message', {
+//   text: String,
+//   sender: String,
+//   timestamp: { type: Date, default: Date.now },
+// });
+
+// On client connection
+io.on('connection', socket => {
+  console.log('Client connected');
+
+  socket.on('chat-message', async (data) => {
+    // const msg = new Message(data);
+    // await msg.save();
+    io.emit('chat-message', "all messages"); // Broadcast to all
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
 });
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+// Optional: API to get all previous messages
+app.get('/messages', async (req, res) => {
+  //const messages = await Message.find().sort({ timestamp: 1 });
+ // res.json(messages);
+  res.end("messages");
 });
 
-
-
-// With DB
-// mongoose.connect(process.env.MONGO_CONNECTIONSTRING)
-// .then(()=>{
-//   app.listen(port,(err)=>{
-//     if(err){
-//       console.log(err)
-//     }else{
-//       console.log(`app listening on port http://localhost:${port}`)
-//     }
-//   });
-// })
-// .catch((err)=>{
-//   console.log("Not connect to DB: " + err)
-// })
-
-
-
-
-//mongodb+srv://shahzad:87654321@cluster0.wi5wf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+// Start server
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
